@@ -8,6 +8,12 @@
 
 namespace Photoxel
 {
+	ID3D11Device* D3D11Context::m_Device = nullptr;
+	ID3D11DeviceContext* D3D11Context::m_DeviceContext = nullptr;
+	ID3D11RenderTargetView* D3D11Context::m_RenderTargetView = nullptr;
+	IDXGISwapChain* D3D11Context::m_SwapChain = nullptr;
+	ID3D11ShaderResourceView* D3D11Context::m_ShaderResourceView;
+
 	D3D11Context::D3D11Context(Window* window)
 		: m_Window(window)
 	{
@@ -56,12 +62,13 @@ namespace Photoxel
 		};
 
 		DXGI_SWAP_CHAIN_DESC scd = { 0 };
-		scd.BufferCount = 1u;
+		scd.BufferCount = 2u;
 		scd.BufferDesc.Width = 0u;
 		scd.BufferDesc.Height = 0u;
 		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferDesc.RefreshRate.Numerator = 60;
 		scd.BufferDesc.RefreshRate.Denominator = 1;
+		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		scd.OutputWindow = reinterpret_cast<HWND>(m_Window->GetNativeHandler());
 		scd.Windowed = TRUE;
@@ -94,7 +101,7 @@ namespace Photoxel
 		m_Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &a);
 
 		ID3D11Texture2D* m_Resource = nullptr;
-		hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&m_Resource));
+		hr = m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&m_Resource));
 
 		PX_ASSERT(!FAILED(hr), "No se pudo crear el Back Buffer");
 
@@ -105,7 +112,7 @@ namespace Photoxel
 		if (m_Resource) {
 			m_Resource->Release();
 		}
-
+		/*
 		D3D11_VIEWPORT viewport = { 0 };
 		viewport.Width = static_cast<float>(m_Window->GetWidth());
 		viewport.Height = static_cast<float>(m_Window->GetHeight());
@@ -189,6 +196,7 @@ namespace Photoxel
 		PX_ASSERT(!FAILED(hr), "No se pudo crear el Rasterizer State");
 
 		m_DeviceContext->RSSetState(m_RasterizerState);
+		*/
 	}
 
 	D3D11Context::~D3D11Context()
@@ -206,9 +214,27 @@ namespace Photoxel
 
 	void D3D11Context::Present()
 	{
-		const FLOAT colour[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
-		m_DeviceContext->ClearRenderTargetView(m_RenderTargetView, colour);
-
-		m_SwapChain->Present(0, 0);
+		m_SwapChain->Present(1u, 0u);
 	}
+
+
+	void D3D11Context::InvalidateRenderTargetView(uint32_t width, uint32_t height)
+	{
+		RELEASE_COM(m_RenderTargetView);
+
+		if (m_SwapChain && m_Device) {
+
+			m_SwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+
+			ID3D11Texture2D* pBackBuffer;
+			m_SwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+			m_Device->CreateRenderTargetView(pBackBuffer, nullptr, &m_RenderTargetView);
+			pBackBuffer->Release();
+		}
+
+	}
+
+
+
+
 }

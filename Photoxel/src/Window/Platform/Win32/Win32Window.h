@@ -24,7 +24,13 @@ namespace Photoxel
 
 		virtual void SetIcons(const std::string& filepath) override;
 		virtual void* GetNativeHandler() const override;
-		virtual void PollEvents() override;
+		virtual void Update() override;
+
+
+		virtual void Present() override {
+			m_Context->Present();
+		}
+
 	private:
 		HWND m_Handler = nullptr;
 		//WNDCLASSEX m_WindowClass; // TODO: Que hacer con esto

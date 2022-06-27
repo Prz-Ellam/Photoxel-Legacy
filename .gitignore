@@ -2,3 +2,9 @@
 bin
 *.sln
 *.vcxproj*
+*.jpg*
+*.png*
+*.bmp*
+*.gif*
+*.jpeg*
+*.ini*

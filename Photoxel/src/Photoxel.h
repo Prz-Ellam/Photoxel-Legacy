@@ -11,5 +11,8 @@
 #include "Window/Platform/Win32/Win32Window.h"
 #include "Rendering/Platform/D3D11Context.h"
 #include "Window/Window.h"
+#include "Rendering/Platform/D3D11Context.h"
+#include "Rendering/Platform/D3D11Renderer.h"
+#include "Rendering/Platform/D3D11Framebuffer.h"
 
 #endif

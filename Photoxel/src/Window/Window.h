@@ -27,7 +27,8 @@ namespace Photoxel
 
 		virtual void SetIcons(const std::string& filepath) = 0;
 		virtual void* GetNativeHandler() const = 0;
-		virtual void PollEvents() = 0;
+		virtual void Update() = 0;
+		virtual void Present() = 0;
 
 		void SetWindowCloseEventCallback(WindowCloseEventFn windowCloseEventFn);
 		void SetWindowResizeEventCallback();
